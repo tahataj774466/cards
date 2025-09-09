@@ -3,22 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>کارت پاسور واقعی</title>
+  <title>For you 💕</title>
   <style>
     body {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
-      background: radial-gradient(circle at center, #006400, #013220);
+      background: linear-gradient(135deg, #006400, #013220, #004d00);
+      background-size: 300% 300%;
+      animation: gradientMove 10s ease infinite;
       font-family: sans-serif;
+      color: #fff;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .card {
-      width: 200px;
-      height: 300px;
+      width: 260px;
+      height: 400px;
       perspective: 1000px;
+      cursor: pointer;
+      position: relative;
     }
 
     .card-inner {
@@ -27,10 +39,11 @@
       height: 100%;
       transition: transform 0.8s;
       transform-style: preserve-3d;
+      transform: rotateY(180deg); /* شروع از پشت پاسور */
     }
 
-    .card:hover .card-inner {
-      transform: rotateY(180deg);
+    .card.flipped .card-inner {
+      transform: rotateY(0deg); /* وقتی کلیک شد برگرده به جلو */
     }
 
     .card-front, .card-back {
@@ -38,10 +51,11 @@
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
-      border-radius: 12px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+      border-radius: 14px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.35);
       background-size: cover;
       background-position: center;
+      overflow: hidden;
     }
 
     /* کارت جلویی (تک دل واقعی) */
@@ -54,14 +68,78 @@
       background-image: url("https://deckofcardsapi.com/static/img/back.png");
       transform: rotateY(180deg);
     }
+
+    /* افکت نور */
+    .shine {
+      position: absolute;
+      top: 0;
+      left: -75%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(
+        120deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: skewX(-20deg);
+      pointer-events: none;
+    }
+
+    .shine.active {
+      animation: shineMove 1.2s forwards;
+    }
+
+    @keyframes shineMove {
+      0% { left: -75%; }
+      100% { left: 125%; }
+    }
+
+    .hint {
+      margin-top: 20px;
+      font-size: 18px;
+      opacity: 0.9;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.9; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.05); }
+    }
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="card" id="card">
     <div class="card-inner">
-      <div class="card-front"></div>
+      <div class="card-front">
+        <div class="shine" id="shine"></div>
+      </div>
       <div class="card-back"></div>
     </div>
   </div>
+  <div class="hint">روش کلیک کن</div>
+
+  <!-- صدای کارت خوردن -->
+  <audio id="flipSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9c7ef9e58d.mp3?filename=card-flip-39908.mp3"></audio>
+
+  <script>
+    const card = document.getElementById("card");
+    const flipSound = document.getElementById("flipSound");
+    const shine = document.getElementById("shine");
+
+    card.addEventListener("click", () => {
+      card.classList.toggle("flipped");
+      flipSound.currentTime = 0;
+      flipSound.play();
+
+      // فقط وقتی به جلو برمی‌گرده افکت نور اجرا بشه
+      if (card.classList.contains("flipped")) {
+        shine.classList.add("active");
+        shine.addEventListener("animationend", () => {
+          shine.classList.remove("active");
+        }, { once: true });
+      }
+    });
+  </script>
 </body>
 </html>
